@@ -1,0 +1,1214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>The Eighteen Edition</title>
+<meta name="description" content="Beyond the Basics, Sanai's 7-day mix-and-match playbook. A style guide by Earon, made into a book that opens on your phone.">
+<meta name="theme-color" content="#D6336C">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Jost:wght@400;500&display=swap">
+<style>
+/* Layout: a dark room, one portrait stage (max 480px wide), a 3D book of leaves hinged at the left edge.
+   One page per screen. The page body scrolls; a horizontal drag turns the leaf. Tokens come from DESIGN.md. */
+:root{
+  --paper:#FAF3EF;--ink:#2B1D22;--muted:#7A6A70;--accent:#D6336C;--blush:#F6DDE3;--rose:#E9A3B8;--petal:#FBEDF0;
+  --border:#E6D5D9;--night:#1E0F18;--on-accent:#FFFFFF;--gold:#C9A86A;
+  --room:#F3D9E1;
+  --bg:var(--room);--fg:var(--ink);
+  --font-display:"Bodoni Moda","Bodoni 72","Didot",Georgia,"Times New Roman",serif;
+  --font-text:"Jost","Avenir Next","Futura","Helvetica Neue",Arial,sans-serif;
+  --t-quick:180ms;--t-med:260ms;--t-page:420ms;--ease-out:cubic-bezier(.2,.8,.2,1);
+  --sh-raised:0 1px 0 rgba(43,29,34,.08),0 2px 6px rgba(43,29,34,.06);
+  --sh-floating:0 1px 2px rgba(43,29,34,.10),0 12px 28px rgba(43,29,34,.12);
+  --sh-book:0 2px 4px rgba(43,29,34,.14),0 30px 60px -10px rgba(43,29,34,.28);
+  --page-pad:24px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--room:#120910;--bg:#120910;color-scheme:dark}}
+:root[data-theme="dark"]{--room:#120910;--bg:#120910;color-scheme:dark}
+
+/* book.css: the room, the stage, the leaves, and the page system. Motion numbers are in motion-notes.md. */
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-text);font-size:17px;line-height:1.5;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
+.room{position:fixed;inset:0;overflow:hidden;background:var(--room);display:flex;align-items:center;justify-content:center;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);transition:background 900ms var(--ease-out)}
+.room.lit{background:var(--night)}
+.room-mast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:max-content;text-align:center;font-family:var(--font-display);font-size:clamp(64px,36vw,150px);line-height:.9;color:var(--rose);opacity:.55;letter-spacing:-.02em;pointer-events:none;user-select:none;transition:opacity 600ms var(--ease-out)}
+.room.open .room-mast{opacity:0}
+.stage{position:relative;width:100%;height:100%;perspective:1400px;perspective-origin:50% 50%;overflow:hidden}
+@media (min-width:900px){.stage{width:480px;height:min(100%,900px);border-radius:16px}}
+.curtain{position:absolute;inset:0;background:var(--room);z-index:50;transition:opacity 300ms var(--ease-out);pointer-events:none}
+.curtain.off{opacity:0}
+.book{position:absolute;inset:0;transform-style:preserve-3d;transition:transform 900ms var(--ease-out);transform-origin:50% 50%;touch-action:pan-y}
+.book.closed{transform:scale(.78) rotateX(var(--rx,4deg)) rotateY(var(--ry,-6deg))}
+.book.closed.tilting{transition:none}
+.book.closed.press{transition:transform 120ms var(--ease-out);transform:scale(.765) rotateX(var(--rx,4deg)) rotateY(var(--ry,-6deg))}
+.edges{position:absolute;inset:0;transform:translate3d(7px,7px,-3px);background:var(--paper);opacity:0;transition:opacity 400ms var(--ease-out);box-shadow:var(--sh-book)}
+.edges::before{content:"";position:absolute;right:0;top:0;bottom:0;width:9px;background:repeating-linear-gradient(to right,#fff 0 1px,#E8DCD6 1px 3px)}
+.edges::after{content:"";position:absolute;left:0;right:0;bottom:0;height:9px;background:repeating-linear-gradient(to bottom,#fff 0 1px,#E8DCD6 1px 3px)}
+.book.closed .edges{opacity:1}
+.leaf{position:absolute;inset:0;transform-origin:0 50%;transform-style:preserve-3d;z-index:var(--z)}
+.leaf.active{will-change:transform}
+.leaf.turned{pointer-events:none}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--paper);overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.face.front::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.045;z-index:3;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.face.front.night{background:var(--night)}
+.face.back{transform:rotateY(180deg);background:var(--blush)}
+.shade{position:absolute;inset:0;pointer-events:none;z-index:4;background:linear-gradient(to right,transparent 35%,rgba(35,26,30,.65));opacity:var(--shade,0)}
+.cast{position:absolute;inset:0;pointer-events:none;z-index:5;background:linear-gradient(to right,rgba(35,26,30,.75),transparent 45%);opacity:var(--cast,0)}
+.spine{position:absolute;left:0;top:0;bottom:0;width:10px;z-index:6;pointer-events:none;background:linear-gradient(to right,rgba(43,29,34,.28),rgba(43,29,34,.06) 60%,transparent)}
+.book.closed .spine{display:none}
+
+/* nav */
+.nav{position:absolute;top:62%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:0;background:rgba(43,29,34,.08);color:var(--ink);display:grid;place-items:center;z-index:40;cursor:pointer;opacity:0;transition:opacity 300ms var(--ease-out),transform var(--t-quick) var(--ease-out);padding:0}
+.nav:active{transform:translateY(-50%) scale(.94)}
+.nav svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.nav.prev{left:4px}.nav.next{right:4px}
+.room.open .nav{opacity:.55}
+@media (hover:none){.nav{display:none}} /* phones: swipe or tap an edge; the arrows are for mouse users */
+.room.open .nav[disabled]{opacity:.15;pointer-events:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* page system */
+.page{position:absolute;inset:0;display:flex;flex-direction:column;color:var(--ink);z-index:2}
+.page-head{flex:none;display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:18px var(--page-pad) 0}
+.kicker{font:500 12px/1.2 var(--font-text);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.kicker .acc{color:var(--accent)}
+.page-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:10px var(--page-pad) 20px;scrollbar-width:none}
+.page-body::-webkit-scrollbar{display:none}
+.folio{flex:none;display:flex;justify-content:space-between;margin:0 var(--page-pad);padding:6px 0 12px;font:400 12px/1.3 var(--font-text);letter-spacing:.06em;color:var(--muted);border-top:1px solid var(--border);font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;margin:0;text-wrap:balance}
+.h{font-size:clamp(32px,9vw,36px);line-height:1.05;letter-spacing:-.005em;margin:6px 0 12px}
+.sub{font:500 17px/1.4 var(--font-text);margin:0 0 12px;color:var(--ink)}
+.masthead{font-family:var(--font-display);font-weight:400;font-size:clamp(48px,14vw,56px);line-height:.95;letter-spacing:-.01em;margin:0}
+p{margin:0 0 12px;max-width:60ch}
+.lede{color:var(--muted)}
+.small{font-size:17px;line-height:1.5}
+.bleed{margin:6px calc(-1*var(--page-pad)) 14px}
+.bleed img{display:block;width:100%;height:auto;max-width:100%}
+.photo-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:6px 0 10px}
+.photo-pair figure{margin:0;min-width:0}
+.photo-pair img{display:block;width:100%;height:auto;max-width:100%;aspect-ratio:3/4;object-fit:cover}
+figcaption{font:500 12px/1.3 var(--font-text);letter-spacing:.08em;color:var(--muted);margin-top:6px;text-transform:uppercase}
+.cap{font-size:17px;line-height:1.5;margin:4px 0 0}
+.cap b{display:block;font:500 12px/1.4 var(--font-text);letter-spacing:.12em;text-transform:uppercase;color:var(--ink);margin-bottom:4px}
+.link-row{display:flex;justify-content:space-between;align-items:center;min-height:44px;margin-top:14px;border-top:1px solid var(--border);text-decoration:none;color:var(--ink);font-weight:500;transition:transform var(--t-med) var(--ease-out)}
+@media (hover:hover){.link-row:hover{transform:translateY(-2px)}}
+.link-row .arrow{color:var(--accent);font-size:20px}
+.tags{font:500 12px/1.5 var(--font-text);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:14px}
+.steps{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:14px}
+.steps li{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:baseline}
+.steps .n{font:500 12px/1.6 var(--font-text);letter-spacing:.1em;color:var(--muted);font-variant-numeric:tabular-nums}
+.steps b{display:block;font:500 17px/1.3 var(--font-text);margin-bottom:2px}
+.formula{display:flex;justify-content:space-between;gap:8px;margin:18px 0 6px;font:500 12px/1 var(--font-text);letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+.formula span+span::before{content:"·";margin-right:8px;color:var(--accent)}
+.rule{border:0;border-top:1px solid var(--border);margin:14px 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:0;border-radius:4px;background:var(--accent);color:var(--on-accent);font:500 17px/1 var(--font-text);letter-spacing:.02em;cursor:pointer;transition:transform var(--t-quick) var(--ease-out);text-decoration:none}
+.btn:active{transform:scale(.97) translateY(1px)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--border)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;animation:ring var(--t-quick) var(--ease-out)}
+@keyframes ring{from{outline-offset:0}}
+.reveal{opacity:1;transform:none}
+.page.entered .reveal{animation:rise 300ms var(--ease-out) both;animation-delay:calc(var(--i,0)*40ms)}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* cover */
+.cover{position:absolute;inset:0;background:linear-gradient(160deg,#E86A9C 0%,#D6336C 55%,#B8255A 100%);color:var(--on-accent);display:flex;flex-direction:column;padding:28px var(--page-pad) 26px;overflow:hidden}
+.cover::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.18),transparent 40%,rgba(0,0,0,.08) 85%)}
+.cover .kicker{color:rgba(255,255,255,.85);padding-right:96px}
+.cover-title{font-size:clamp(56px,17vw,68px);margin:26px 0 14px;color:#FFF4F7;text-shadow:0 1px 0 rgba(0,0,0,.08)}
+.cover-line{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-style:italic;font-size:24px;color:#FFF4F7;margin:0 0 auto}
+.cover-line .dash{width:36px;height:1px;background:rgba(255,255,255,.7)}
+.cover-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;margin:0 calc(-1*var(--page-pad)) 18px;max-width:none}
+.cover-strip img{display:block;width:100%;height:auto;max-width:100%;aspect-ratio:3/4;object-fit:cover;box-shadow:0 10px 24px -8px rgba(43,29,34,.35)}
+.cover-for{font-family:var(--font-display);font-style:italic;font-size:24px;line-height:1.1;margin:0 0 8px;color:#FFF4F7}
+.cover-by{font:500 12px/1.5 var(--font-text);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.8);margin:0}
+.hint{position:absolute;left:0;right:0;bottom:env(safe-area-inset-bottom,0px);text-align:center;font:500 12px/1 var(--font-text);letter-spacing:.18em;text-transform:uppercase;color:var(--ink);opacity:0;transition:opacity 400ms var(--ease-out);padding:14px 0;pointer-events:none;z-index:45}
+.hint.on{opacity:.75}
+.room.open .hint{opacity:0}
+
+/* ornaments */
+.orn{position:absolute;pointer-events:none;will-change:transform;z-index:7}
+.orn svg{display:block;width:100%;height:100%;overflow:visible}
+.pearl{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0,#FBE3EA 30%,#E9A3B8 70%,#C9789A 100%);box-shadow:0 2px 6px rgba(43,29,34,.2)}
+.petal{width:22px;height:34px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:linear-gradient(180deg,#FBEDF0,#E9A3B8);box-shadow:0 2px 6px rgba(43,29,34,.18);transform:rotate(var(--rot,20deg))}
+
+/* birthday */
+.night .page{color:#FFF4F7}
+.sky{position:relative;flex:none;height:46%;min-height:240px}
+.sky canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.sky::before{content:"";position:absolute;inset:0;opacity:.07;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><text x='22' y='92' font-family='Georgia,serif' font-style='italic' font-size='96' fill='%23E9A3B8'>S</text></svg>")}
+.wish{flex:1;min-height:0;overflow-y:auto;padding:4px var(--page-pad) 32px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;touch-action:pan-y}
+.wish .kicker{color:var(--rose)}
+.age{font-family:var(--font-display);font-size:clamp(88px,30vw,120px);line-height:.9;color:#FFF4F7;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:2px 0 6px}
+.wish p{color:#F6DDE3;margin:0 0 4px}
+.wish .from{font:500 17px/1.4 var(--font-text);color:#FFF4F7;margin-top:4px}
+.quote{margin:2px 0 10px;padding:0;max-width:30ch}
+.quote p{font-family:var(--font-display);font-style:italic;font-size:24px;line-height:1.2;color:#FFF4F7;margin:0 0 6px;text-wrap:balance}
+.quote cite{font:500 12px/1 var(--font-text);letter-spacing:.18em;text-transform:uppercase;font-style:normal;color:var(--rose)}
+.night .folio{border-top-color:rgba(246,221,227,.25);color:var(--rose)}
+.fade{opacity:0;transition:opacity 600ms var(--ease-out)}
+.fade.on{opacity:1}
+
+/* stack */
+.stack{list-style:none;margin:12px 0 0;padding:0}
+.stack li{border-top:1px solid var(--border)}
+.stack li:first-child{border-top:0}
+.stack button{width:100%;min-height:44px;display:flex;justify-content:space-between;align-items:center;gap:12px;background:none;border:0;padding:8px 0;text-align:left;font:400 17px/1.3 var(--font-text);color:var(--ink);cursor:pointer}
+.stack button small{font:500 12px/1 var(--font-text);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);flex:none}
+.stack .bonus button small{color:var(--accent)}
+
+/* maths */
+.counter{font-family:var(--font-display);font-size:clamp(56px,18vw,72px);line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;margin:6px 0 2px}
+.counter small{font-size:.42em;font-style:italic;letter-spacing:0}
+.steppers{display:grid;gap:8px;margin:14px 0 6px}
+.stepper{display:grid;grid-template-columns:1fr 44px 40px 44px;align-items:center;gap:4px;min-height:44px}
+.stepper span{font-weight:500}
+.stepper output{text-align:center;font-variant-numeric:tabular-nums;font-weight:500}
+.stepper button{width:44px;height:44px;border-radius:50%;border:0;background:var(--blush);color:var(--ink);font:500 17px/1 var(--font-text);cursor:pointer;transition:transform var(--t-quick) var(--ease-out)}
+.stepper button:active{transform:scale(.94)}
+
+/* map */
+.legend{display:flex;gap:16px;flex-wrap:wrap;font:500 12px/1.4 var(--font-text);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:4px 0 10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;box-shadow:0 0 0 2px var(--accent) inset}
+.legend i.less{border-radius:2px;transform:rotate(45deg);box-shadow:0 0 0 2px var(--ink) inset}
+.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 6px;margin:8px 0 12px}
+.sw{display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;padding:2px 0;cursor:pointer;font:400 12px/1.15 var(--font-text);color:var(--ink);letter-spacing:.01em;min-height:44px}
+.sw i{display:block;width:48px;height:48px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(43,29,34,.14);transition:transform var(--t-quick) var(--ease-out),box-shadow var(--t-quick) var(--ease-out)}
+.sw:active i{transform:scale(.94)}
+.sw[aria-pressed="true"] i{box-shadow:0 0 0 2px var(--paper),0 0 0 4px var(--accent);transform:scale(1.06)}
+.sw.familiar i{box-shadow:0 0 0 2px var(--paper),0 0 0 3px var(--accent)}
+.sw.less i{border-radius:8px;transform:rotate(45deg) scale(.8);box-shadow:0 0 0 2px var(--paper),0 0 0 3px var(--ink)}
+.sw.less:active i{transform:rotate(45deg) scale(.76)}
+.partners{margin:4px 0 12px;padding:12px 12px 8px;background:var(--petal);border-radius:4px}
+.partners .who{font:500 12px/1.4 var(--font-text);letter-spacing:.14em;text-transform:uppercase;margin:0 0 4px}
+.partners .swatches{grid-template-columns:repeat(5,1fr);margin:6px 0 0}
+.partners .swatches .sw i{width:36px;height:36px}
+.partners .swatches .sw{min-height:0}
+.verdict{font:500 17px/1.4 var(--font-text);margin:10px 0 4px}
+
+/* builder */
+.strips{display:grid;gap:10px;margin:10px 0}
+.strip-label{display:flex;justify-content:space-between;font:500 12px/1 var(--font-text);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.strip-label output{color:var(--ink);text-transform:none;letter-spacing:.02em}
+.strip{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 6px;margin:0 -2px;touch-action:pan-x pan-y;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.strip::-webkit-scrollbar{display:none}
+.strip .sw{flex:none;width:48px;min-height:0;font-size:0;padding:0}
+.strip .sw i{width:44px;height:44px}
+.fig{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:start;margin:10px 0 4px}
+.fig svg{width:96px;height:168px;display:block}
+.verdicts{list-style:none;margin:0;padding:0;font-size:17px;line-height:1.4;display:grid;gap:6px}
+.verdicts li b{font-weight:500}
+.verdicts .tag{font:500 12px/1 var(--font-text);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-left:6px}
+.verdicts .tag.less{color:var(--ink)}
+.verdicts .tag.none{color:var(--muted)}
+
+/* lists, grids, checks */
+.check{display:flex;align-items:center;gap:14px;min-height:44px;background:none;border:0;padding:0;width:100%;text-align:left;font:400 17px/1.35 var(--font-text);color:var(--ink);cursor:pointer}
+.check i{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--muted);transition:background var(--t-quick) var(--ease-out),border-color var(--t-quick) var(--ease-out),transform var(--t-quick) var(--ease-out)}
+.check:active i{transform:scale(.9)}
+.check[aria-checked="true"] i{background:var(--accent);border-color:var(--accent)}
+.check[aria-checked="true"] span{color:var(--muted)}
+.check .day{font:500 12px/1 var(--font-text);letter-spacing:.12em;color:var(--muted);flex:none;width:28px;font-variant-numeric:tabular-nums}
+.checks{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:2px}
+.progress{display:flex;align-items:baseline;gap:10px;margin:2px 0 8px}
+.progress .n{font-family:var(--font-display);font-size:clamp(32px,9vw,36px);line-height:1;font-variant-numeric:tabular-nums}
+.progress .of{font:500 12px/1 var(--font-text);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.lab{display:grid;grid-template-columns:1fr repeat(3,60px);gap:6px 4px;align-items:center;margin:12px 0 4px}
+.lab .lh{font:500 12px/1.2 var(--font-text);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:center}
+.lab .lr{font-weight:500;padding-right:4px}
+.lab button{height:44px;border:1px solid var(--border);border-radius:4px;background:var(--paper);cursor:pointer;transition:transform var(--t-quick) var(--ease-out),background var(--t-quick) var(--ease-out)}
+.lab button:active{transform:scale(.97)}
+.lab button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;border-top:1px solid var(--border);padding:6px 0}
+.toggle:first-of-type{border-top:0}
+.toggle .yn{display:flex;gap:4px;flex:none}
+.toggle .yn button{min-width:44px;height:36px;border-radius:4px;border:1px solid var(--border);background:var(--paper);font:500 12px/1 var(--font-text);color:var(--ink);cursor:pointer}
+.toggle .yn button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.rel{display:grid;grid-template-columns:1fr;gap:12px;margin:8px 0 4px}
+.rel .chips{display:flex;gap:6px;margin:4px 0 6px}
+.rel .chips i{width:28px;height:28px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(43,29,34,.14)}
+.rel b{display:block;font:500 12px/1.4 var(--font-text);letter-spacing:.14em;text-transform:uppercase}
+.rel p{margin:0}
+.back-cover{background:var(--petal)}
+.back-cover .masthead{color:var(--rose);font-size:clamp(56px,19vw,76px);margin-top:auto;opacity:.9}
+.edition{font:500 12px/1.8 var(--font-text);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.questions{display:grid;gap:2px;margin:6px 0 10px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:1ms!important;animation-delay:0ms!important;transition-duration:1ms!important}
+  .leaf.turned{opacity:0}
+  .reveal{opacity:1;transform:none}
+}
+
+</style>
+<header class="sr">Beyond the Basics, The Eighteen Edition. A style guide by Earon, for Sanai.</header>
+<main class="room" id="room">
+  <div class="room-mast" aria-hidden="true">Beyond<br>the<br>Basics</div>
+  <div class="stage" id="stage">
+    <div class="book closed" id="book">
+      <div class="edges" aria-hidden="true"></div>
+<section class="leaf" data-i="21" style="--z:1"><div class="face front"><article class="page back-cover" aria-label="Back cover">
+  <header class="page-head"><span class="kicker">From Earon</span><span class="kicker">Vol. 01</span></header>
+  <div class="page-body" style="display:flex;flex-direction:column">
+    <p class="edition">Beyond the Basics · The Eighteen Edition</p>
+    <p class="edition"><span data-gift="NAME">Sanai</span>'s 7-day mix-and-match playbook</p>
+    <p class="lede" style="margin-top:12px">Four discoveries. A colour playbook. A starting point for making it your own.</p>
+    <button class="btn ghost" type="button" id="close-book" data-noflip style="align-self:flex-start;margin-top:10px">Back to the cover</button>
+    <h2 class="masthead">Beyond<br>the Basics</h2>
+  </div>
+  <footer class="folio"><span>22 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="20" style="--z:2"><div class="face front"><article class="page" aria-label="Edition 1 of 1">
+  <header class="page-head"><span class="kicker"><span class="acc">Edition 1 of 1</span></span></header>
+  <div class="page-body">
+    <h2 class="h">Made for <span data-gift="NAME">Sanai</span>.</h2>
+    <p class="lede" id="edition-date" data-gift="DATE" hidden></p>
+    <p>No other copy exists.</p>
+    <hr class="rule">
+    <p><b>If a pairing the Map calls familiar looks wrong on you,</b> send <span data-gift="FROM">Earon</span> the photo. You fix it together the same day.</p>
+    <p class="small lede">Pay attention to what you keep choosing. Repetition is evidence of your taste beginning to take shape.</p>
+  </div>
+  <footer class="folio"><span>21 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="19" style="--z:3"><div class="face front"><article class="page" aria-label="Before you buy">
+  <header class="page-head"><span class="kicker">Before you buy</span></header>
+  <div class="page-body">
+    <h2 class="h">Two questions, then the checks.</h2>
+    <div id="buy">
+      <div class="toggle"><span>Would you wear it twice this week?</span><div class="yn"><button type="button" aria-pressed="false" data-q="1" data-v="yes">Yes</button><button type="button" aria-pressed="false" data-q="1" data-v="no">No</button></div></div>
+      <div class="toggle"><span>Does it go with three things you own?</span><div class="yn"><button type="button" aria-pressed="false" data-q="2" data-v="yes">Yes</button><button type="button" aria-pressed="false" data-q="2" data-v="no">No</button></div></div>
+      <p class="verdict" id="buy-verdict">Answer both.</p>
+    </div>
+    <hr class="rule">
+    <ol class="steps">
+      <li><span class="n">01</span><div><b>Size.</b> Open the label's official size guide and compare it with your own measurements. Check the garment's measurements too. The labelled size alone may not tell you how that piece fits.</div></li>
+      <li><span class="n">02</span><div><b>Fabric.</b> Read the fabric composition and the care instructions.</div></li>
+      <li><span class="n">03</span><div><b>Money and delivery.</b> Confirm the currency, shipping cost, possible duties, delivery terms and the return policy, especially when the label is based abroad.</div></li>
+    </ol>
+  </div>
+  <footer class="folio"><span>20 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="18" style="--z:4"><div class="face front"><article class="page" aria-label="Your first week">
+  <header class="page-head"><span class="kicker">Make it yours</span><span class="kicker">7 days</span></header>
+  <div class="page-body">
+    <h2 class="h">Your first week.</h2>
+    <div class="progress"><span class="n" id="week-n">0</span><span class="of">of 7 done</span></div>
+    <ul class="checks" id="week">
+      <li><button class="check" type="button" role="checkbox" aria-checked="false" data-day="1"><span class="day">01</span><i></i><span>Explore all four labels. Save what sparks your curiosity.</span></button></li>
+      <li><button class="check" type="button" role="checkbox" aria-checked="false" data-day="2"><span class="day">02</span><i></i><span>Name what caught you: shape, colour, texture or detail.</span></button></li>
+      <li><button class="check" type="button" role="checkbox" aria-checked="false" data-day="3"><span class="day">03</span><i></i><span>Choose one pair of bottoms as your foundation.</span></button></li>
+      <li><button class="check" type="button" role="checkbox" aria-checked="false" data-day="4"><span class="day">04</span><i></i><span>Build and photograph one outfit around them.</span></button></li>
+      <li><button class="check" type="button" role="checkbox" aria-checked="false" data-day="5"><span class="day">05</span><i></i><span>Build and photograph a second, different outfit.</span></button></li>
+      <li><button class="check" type="button" role="checkbox" aria-checked="false" data-day="6"><span class="day">06</span><i></i><span>Change one element. Note what improved and why.</span></button></li>
+      <li><button class="check" type="button" role="checkbox" aria-checked="false" data-day="7"><span class="day">07</span><i></i><span>Write down what you kept choosing.</span></button></li>
+    </ul>
+  </div>
+  <footer class="folio"><span>19 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="17" style="--z:5"><div class="face front"><article class="page" aria-label="Outfit builder">
+  <header class="page-head"><span class="kicker">Your turn</span></header>
+  <div class="page-body">
+    <h2 class="h">Build an outfit.</h2>
+    <p class="lede">Tap a colour for the bottoms, the top, a layer and the shoes. The Map says which pairs are familiar.</p>
+    <div class="fig">
+      <svg viewBox="0 0 96 168" aria-hidden="true" id="figure">
+        <path d="M48 6 C36 6 30 16 31 28 C32 40 38 46 48 46 C58 46 64 40 65 28 C66 16 60 6 48 6 Z" fill="#E9A3B8"/>
+        <path d="M32 30 C30 44 34 56 36 62 L60 62 C62 56 66 44 64 30 C60 38 54 42 48 42 C42 42 36 38 32 30 Z" fill="#C9789A"/>
+        <path id="f-top" d="M36 50 L60 50 L66 66 L62 80 L60 96 L36 96 L34 80 L30 66 Z" fill="#8E8E8E"/>
+        <path id="f-layer" d="M30 66 L36 50 L34 80 L36 96 L26 100 L24 76 Z M66 66 L60 50 L62 80 L60 96 L70 100 L72 76 Z" fill="#8E8E8E" opacity=".9"/>
+        <path id="f-bottom" d="M36 96 L60 96 L68 144 L54 144 L48 118 L42 144 L28 144 Z" fill="#8E8E8E"/>
+        <path id="f-shoes" d="M27 144 L44 144 L44 152 L24 152 Z M52 144 L69 144 L72 152 L52 152 Z" fill="#8E8E8E"/>
+      </svg>
+      <ul class="verdicts" id="verdicts"><li class="lede">Pick two colours to see what the guide says.</li></ul>
+    </div>
+    <div class="strips" id="strips">
+      <div><div class="strip-label"><span>Bottoms</span><output data-for="bottom">none yet</output></div><div class="strip" data-slot="bottom"></div></div>
+      <div><div class="strip-label"><span>Top</span><output data-for="top">none yet</output></div><div class="strip" data-slot="top"></div></div>
+      <div><div class="strip-label"><span>Layer</span><output data-for="layer">none yet</output></div><div class="strip" data-slot="layer"></div></div>
+      <div><div class="strip-label"><span>Shoes</span><output data-for="shoes">none yet</output></div><div class="strip" data-slot="shoes"></div></div>
+    </div>
+    <div class="formula"><span>Bottoms</span><span>Proportion</span><span>Colour</span></div>
+    <div class="orn" style="right:0;top:6px;width:48px;height:34px;opacity:.9" data-depth="1" aria-hidden="true"><svg viewBox="0 0 48 34"><path d="M24 4 C20 4 18 7 19 10 M24 4 C27 4 29 7 28 9 L24 13 L4 28 L44 28 Z" fill="none" stroke="#E9A3B8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M4 28 L44 28" stroke="#C9789A" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+  </div>
+  <footer class="folio"><span>18 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="16" style="--z:6"><div class="face front"><article class="page" aria-label="Build, pause, explain">
+  <header class="page-head"><span class="kicker">Outfit lab</span></header>
+  <div class="page-body">
+    <h2 class="h">Build, pause, explain.</h2>
+    <p class="lede">Understand your decisions well enough to change them on purpose. Tap a cell as you go.</p>
+    <div class="lab" id="lab" role="group" aria-label="Keep, change or explain each step">
+      <span></span><span class="lh">Keep</span><span class="lh">Change</span><span class="lh">Why</span>
+      <span class="lr">Foundation</span><button type="button" aria-pressed="false" aria-label="Foundation: keep"></button><button type="button" aria-pressed="false" aria-label="Foundation: change"></button><button type="button" aria-pressed="false" aria-label="Foundation: why"></button>
+      <span class="lr">Silhouette</span><button type="button" aria-pressed="false" aria-label="Silhouette: keep"></button><button type="button" aria-pressed="false" aria-label="Silhouette: change"></button><button type="button" aria-pressed="false" aria-label="Silhouette: why"></button>
+      <span class="lr">Colour</span><button type="button" aria-pressed="false" aria-label="Colour: keep"></button><button type="button" aria-pressed="false" aria-label="Colour: change"></button><button type="button" aria-pressed="false" aria-label="Colour: why"></button>
+      <span class="lr">Finish</span><button type="button" aria-pressed="false" aria-label="Finish: keep"></button><button type="button" aria-pressed="false" aria-label="Finish: change"></button><button type="button" aria-pressed="false" aria-label="Finish: why"></button>
+    </div>
+    <ol class="steps" style="margin-top:14px">
+      <li><span class="n">01</span><div><b>Foundation.</b> Choose the bottoms. Name the rise, line, volume and movement they set.</div></li>
+      <li><span class="n">02</span><div><b>Silhouette.</b> Add the next piece. Check where each garment begins and ends.</div></li>
+      <li><span class="n">03</span><div><b>Colour.</b> Decide whether the pairing is tonal, contrasting or built around one accent.</div></li>
+      <li><span class="n">04</span><div><b>Finish.</b> Photograph it. Add, remove or swap one detail, then compare the two versions.</div></li>
+    </ol>
+    <p class="small lede">If you can explain the difference between two versions, your eye is becoming more deliberate.</p>
+  </div>
+  <footer class="folio"><span>17 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="15" style="--z:7"><div class="face front"><article class="page" aria-label="Finish, adjust, repeat">
+  <header class="page-head"><span class="kicker">Put it together / 2</span></header>
+  <div class="page-body">
+    <h2 class="h">Finish, adjust, repeat.</h2>
+    <p class="lede">An outfit can be working before it feels finished. Give yourself room to diagnose it.</p>
+    <ol class="steps">
+      <li><span class="n">01</span><div><b>Let it feel unfinished for a moment.</b>Build enough of the idea to see its direction, then step back. Every stage does not need to look complete.</div></li>
+      <li><span class="n">02</span><div><b>Diagnose before adding more.</b>Ask what is missing: contrast, structure, texture, repetition or a clearer proportion. Sometimes the answer is removing a piece.</div></li>
+      <li><span class="n">03</span><div><b>Use accessories with intention.</b>Jewellery, a bag or one small detail can finish the idea. Repeat a metal, colour or shape, or add one point of tension.</div></li>
+      <li><span class="n">04</span><div><b>Compare versions.</b>Photograph the outfit, change one element and look again. This trains your eye to see why one version works better.</div></li>
+    </ol>
+    <p class="small"><b>The goal is not a perfect formula.</b> It is learning to notice, adjust and make stronger choices on your own.</p>
+  </div>
+  <footer class="folio"><span>16 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="14" style="--z:8"><div class="face front"><article class="page" aria-label="Start with the foundation">
+  <header class="page-head"><span class="kicker">Put it together / 1</span></header>
+  <div class="page-body">
+    <h2 class="h">Start with the foundation.</h2>
+    <p class="lede">My starting point is the bottoms. Use the process as a framework and keep what works for you.</p>
+    <ol class="steps">
+      <li><span class="n">01</span><div><b>Choose the bottoms first.</b>Bottoms set the rise, line, volume and movement. Once that is clear, every other choice has something to respond to.</div></li>
+      <li><span class="n">02</span><div><b>Build the silhouette.</b>Add the next layer. Look where each piece begins and ends, and where the volume sits above and below the waist.</div></li>
+      <li><span class="n">03</span><div><b>Develop the colour relationship.</b>Harmony, contrast, tonal, or one accent. The 60/30/10 idea can help, but your eye matters more than exact percentages.</div></li>
+    </ol>
+    <div class="formula"><span>Bottoms</span><span>Proportion</span><span>Colour</span></div>
+    <p class="small lede">A foundation gives you direction. It does not decide the whole outfit for you.</p>
+  </div>
+  <footer class="folio"><span>15 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="13" style="--z:9"><div class="face front"><article class="page" aria-label="Layers change the outline">
+  <header class="page-head"><span class="kicker">Reference lab</span></header>
+  <div class="page-body">
+    <h2 class="h">Layers change the outline.</h2>
+    <p class="lede">Compare how each look builds depth, controls volume and uses finishing details.</p>
+    <div class="photo-pair">
+      <figure><img src="assets/photos/earon-olive.webp" width="689" height="1200" alt="Earon in a fitted black vest over a grey hoodie, wide olive trousers and white trainers, against a brick wall" loading="eager" decoding="async"><figcaption>Earon</figcaption></figure>
+      <figure><img src="assets/photos/deliah-denim.webp" width="706" height="906" alt="A creator in a fitted graphic top, very wide rounded denim jeans, a cowboy hat, belt and bag" loading="eager" decoding="async"><figcaption><a href="https://www.instagram.com/deliah.xz/" target="_blank" rel="noopener" style="color:inherit">@deliah.xz</a></figcaption></figure>
+    </div>
+    <div class="photo-pair">
+      <p class="cap"><b>Layering + balance</b>A fitted black vest contains the grey hoodie while wide olive trousers restore volume below. Each edge stays visible, so the layers stay readable.</p>
+      <p class="cap"><b>Volume + accessories</b>A fitted graphic top meets rounded denim volume. Hat, belt, bag and hanging details extend the idea without repeating the same object.</p>
+    </div>
+    <p class="small"><b>Take it forward.</b> Choose one relationship you noticed: proportion, repetition, layering or a finishing detail. Use it on the next page, building from the bottoms up.</p>
+  </div>
+  <footer class="folio"><span>14 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="12" style="--z:10"><div class="face front"><article class="page" aria-label="Colour can travel">
+  <header class="page-head"><span class="kicker">Style studies / 2</span></header>
+  <div class="page-body">
+    <h2 class="h">Colour can travel.</h2>
+    <p class="lede">Repetition can be quiet or obvious. Texture changes how the colour is experienced.</p>
+    <div class="photo-pair">
+      <figure><img src="assets/photos/earon-knit.webp" width="690" height="1200" alt="Earon in a cream cable-knit zip cardigan, pale blue jeans and a cream cap, outside a shop" loading="eager" decoding="async"><figcaption>Earon</figcaption></figure>
+      <figure><img src="assets/photos/madamemarleen-orange.webp" width="706" height="906" alt="A creator in an orange headscarf, a striped top with an orange graphic, wide brown shorts and orange shoes" loading="eager" decoding="async"><figcaption><a href="https://www.instagram.com/madamemarleen/" target="_blank" rel="noopener" style="color:inherit">@madamemarleen</a></figcaption></figure>
+    </div>
+    <div class="photo-pair">
+      <p class="cap"><b>Texture + light tones</b>Cable knit gives the cream layer depth. Pale blue denim keeps the palette light while adding colour and surface variation.</p>
+      <p class="cap"><b>Colour repetition + proportion</b>Orange returns at the head, graphic and shoes. Wide shorts and an oversized striped top make the repetition feel playful rather than polished.</p>
+    </div>
+    <p class="small">Look beyond matching. Ask where a colour appears, how often it returns, and whether texture makes the pairing softer or louder.</p>
+  </div>
+  <footer class="folio"><span>13 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="11" style="--z:11"><div class="face front"><article class="page" aria-label="Look first">
+  <header class="page-head"><span class="kicker">Style studies / 1</span></header>
+  <div class="page-body">
+    <h2 class="h">Look first.</h2>
+    <p class="lede">Carry the same observation from colour into shape. How does each outfit control volume?</p>
+    <div class="photo-pair">
+      <figure><img src="assets/photos/earon-beach.webp" width="689" height="1200" alt="Earon on a beach promenade: a fitted white long-sleeve top over relaxed cream cargo trousers, a checked bucket hat" loading="eager" decoding="async"><figcaption>Earon</figcaption></figure>
+      <figure><img src="assets/photos/stttive-burgundy.webp" width="454" height="650" alt="A creator in very wide burgundy parachute trousers, a white top with asymmetric layers, a burgundy headscarf" loading="eager" decoding="async"><figcaption><a href="https://www.instagram.com/stttive/" target="_blank" rel="noopener" style="color:inherit">@stttive</a></figcaption></figure>
+    </div>
+    <p class="tags" style="margin-top:4px">Observe before reading on</p>
+    <div class="questions" id="look-questions">
+      <button class="check" type="button" role="checkbox" aria-checked="false"><i></i><span>Where does the volume change?</span></button>
+      <button class="check" type="button" role="checkbox" aria-checked="false"><i></i><span>Which colour, shape or detail repeats?</span></button>
+      <button class="check" type="button" role="checkbox" aria-checked="false"><i></i><span>What makes each outfit feel complete?</span></button>
+    </div>
+    <p class="small">The fitted white top sharpens relaxed cargo volume. In the second look, burgundy repetition keeps exaggerated trousers, asymmetric layers and accessories connected.</p>
+  </div>
+  <footer class="folio"><span>12 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="10" style="--z:12"><div class="face front"><article class="page" aria-label="Train your eye">
+  <header class="page-head"><span class="kicker">Colour practice</span></header>
+  <div class="page-body">
+    <h2 class="h">Train your eye, then test it.</h2>
+    <p class="lede">Choose one colour you already own. Build three relationships around it.</p>
+    <div class="rel">
+      <div><b>Tonal</b><div class="chips" aria-hidden="true"><i style="--c:#2A3A63"></i><i style="--c:#2F5CB8"></i><i style="--c:#BFD7E8"></i></div><p>Stay within lighter and darker versions of one colour. Let texture do some work.</p></div>
+      <div><b>Contrast</b><div class="chips" aria-hidden="true"><i style="--c:#111111"></i><i style="--c:#B5332E"></i></div><p>Add a colour that creates separation. Adjust the amount until it feels intentional.</p></div>
+      <div><b>Accent</b><div class="chips" aria-hidden="true"><i style="--c:#D6C7A1"></i><i style="--c:#D6C7A1"></i><i style="--c:#A6512D"></i></div><p>Keep the base calm. Add one small colour moment.</p></div>
+    </div>
+  </div>
+  <footer class="folio"><span>11 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="9" style="--z:13"><div class="face front"><article class="page" aria-label="What goes with what">
+  <header class="page-head"><span class="kicker">Colour playbook</span></header>
+  <div class="page-body">
+    <h2 class="h">What goes with what</h2>
+    <p class="lede">Tap a colour. These pairings are starting points.</p>
+    <div class="legend"><span><i></i>Familiar starting point</span><span><i class="less"></i>Less expected possibility</span></div>
+    <div class="swatches" id="map-mains" role="group" aria-label="Main colours"></div>
+    <div class="partners" id="map-partners" hidden></div>
+    <p class="lede">Opposites on the colour wheel are complements. Even a small amount can feel vivid.</p>
+  </div>
+  <footer class="folio"><span>10 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="8" style="--z:14"><div class="face front"><article class="page" aria-label="BLANCH">
+  <header class="page-head"><span class="kicker">04 / Clothing</span><span class="kicker">Door four</span></header>
+  <div class="page-body">
+    <h2 class="h">BLANCH</h2>
+    <p class="sub">Colour that is built to move together.</p>
+    <figure class="bleed"><img src="assets/photos/blanch.webp" width="1200" height="850" alt="Four BLANCH looks side by side: fitted tops with flared skirts and wide trousers in mint, purple, turquoise and brown" loading="eager" decoding="async"></figure>
+    <p>Designed in Western Australia in small batches. Structured yet soft, bold yet wearable. Tops, bottoms, dresses, sets and bags connect through recurring shapes and colour stories.</p>
+    <p><b>How to explore it.</b> Use the Look Library and World of Colour to notice unfamiliar combinations. Then judge every separate on its own: can it enter more than one colour story?</p>
+    <a class="link-row" href="https://blanchwear.com/" target="_blank" rel="noopener"><span>Shop BLANCH, official store</span><span class="arrow">→</span></a>
+    <p class="tags">Explore: colour play · modular sets · soft sculpture</p>
+  </div>
+  <footer class="folio"><span>09 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="7" style="--z:15"><div class="face front"><article class="page" aria-label="NIA">
+  <header class="page-head"><span class="kicker">03 / Clothing</span><span class="kicker">Door three</span></header>
+  <div class="page-body">
+    <h2 class="h">NIA</h2>
+    <p class="sub">Wearability with a point of view.</p>
+    <figure class="bleed"><img src="assets/photos/nia.webp" width="769" height="1000" alt="A NIA look: a sage green draped halter top and matching skirt, photographed in a mirror" loading="eager" decoding="async"></figure>
+    <p>Based in Los Angeles. Everyday separates next to expressive dresses and occasion pieces. Watch the drape, ruching, fitted lines and asymmetric details. A wearable piece can still create interest through how it follows the body.</p>
+    <p><b>How to explore it.</b> Decide the role a piece would play: foundation, focal point or flexible layer. Versatility comes from how many ideas a piece opens, not from choosing a neutral.</p>
+    <a class="link-row" href="https://niathebrand.com/" target="_blank" rel="noopener"><span>Shop NIA, official store</span><span class="arrow">→</span></a>
+    <p class="tags">Explore: modern separates · fluid dresses · draped detail</p>
+  </div>
+  <footer class="folio"><span>08 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="6" style="--z:16"><div class="face front"><article class="page" aria-label="Carbohydrate">
+  <header class="page-head"><span class="kicker">02 / Accessories</span><span class="kicker">Door two</span></header>
+  <div class="page-body">
+    <h2 class="h">Carbohydrate</h2>
+    <p class="sub">Personality in the smallest details.</p>
+    <figure class="bleed"><img src="assets/photos/carbohydrate.webp" width="962" height="1000" alt="Carbohydrate charms: two small red bows tied onto white earbuds" loading="eager" decoding="async"></figure>
+    <p>An independent accessories label with a playful, object-led point of view: headphone charms, miniature flip-flop charms, everyday objects turned into style details. The appeal is scale, humour and placement.</p>
+    <p><b>How to explore it.</b> Start with the feeling you want an accessory to add. Look for a link through colour, shape, motif or material. It can support the outfit or interrupt it on purpose.</p>
+    <a class="link-row" href="https://www.instagram.com/car.bo.hydrate/" target="_blank" rel="noopener"><span>View Carbohydrate, official Instagram</span><span class="arrow">→</span></a>
+    <p class="tags">Explore: headphone charms · miniature objects · playful detail</p>
+  </div>
+  <footer class="folio"><span>07 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="5" style="--z:17"><div class="face front"><article class="page" aria-label="HILLDA">
+  <header class="page-head"><span class="kicker">01 / Clothing</span><span class="kicker">Door one</span></header>
+  <div class="page-body">
+    <h2 class="h">HILLDA</h2>
+    <p class="sub">Shape with a rebellious edge.</p>
+    <figure class="bleed"><img src="assets/photos/hillda.webp" width="704" height="1000" alt="A HILLDA look: a fitted black zip dress with a keyhole neckline and long sleeves" loading="eager" decoding="async"></figure>
+    <p>A Seoul label shaped by punk energy and bold femininity. Look at the construction: ruching, keyholes, one-shoulder lines, fold-over waists, controlled volume. These change the outline before colour comes in.</p>
+    <p><b>How to explore it.</b> Browse by silhouette first. Save the shapes that feel new. Compare them with the bottoms and layers you already own.</p>
+    <a class="link-row" href="https://en.hillda.kr/" target="_blank" rel="noopener"><span>Shop HILLDA, official store</span><span class="arrow">→</span></a>
+    <p class="tags">Explore: statement silhouettes · directional separates</p>
+  </div>
+  <footer class="folio"><span>06 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="4" style="--z:18"><div class="face front"><article class="page" aria-label="Mix and match">
+  <header class="page-head"><span class="kicker">Mix and match</span></header>
+  <div class="page-body">
+    <div class="counter"><span id="outfit-total" data-count="108">108</span> <small>outfits</small></div>
+    <p>From a few pieces you own. Change the numbers and watch the total move. The Map on page 10 says which pairs are familiar.</p>
+    <div class="steppers" id="steppers">
+      <div class="stepper"><span>Bottoms</span><button type="button" data-step="-1" aria-label="fewer bottoms">−</button><output data-k="bottoms">3</output><button type="button" data-step="1" aria-label="more bottoms">+</button></div>
+      <div class="stepper"><span>Tops</span><button type="button" data-step="-1" aria-label="fewer tops">−</button><output data-k="tops">6</output><button type="button" data-step="1" aria-label="more tops">+</button></div>
+      <div class="stepper"><span>Layers</span><button type="button" data-step="-1" aria-label="fewer layers">−</button><output data-k="layers">3</output><button type="button" data-step="1" aria-label="more layers">+</button></div>
+      <div class="stepper"><span>Shoes</span><button type="button" data-step="-1" aria-label="fewer shoes">−</button><output data-k="shoes">2</output><button type="button" data-step="1" aria-label="more shoes">+</button></div>
+    </div>
+    <p class="small lede" id="maths-line">3 × 6 × 3 × 2 = 108</p>
+  </div>
+  <footer class="folio"><span>05 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="3" style="--z:19"><div class="face front"><article class="page" aria-label="What this is">
+  <header class="page-head"><span class="kicker">What this is</span></header>
+  <div class="page-body">
+    <h2 class="h">Know what to wear in two minutes.</h2>
+    <p class="lede">Four labels to explore. One colour map. A way to build any outfit from the bottoms up. A week of small tasks.</p>
+    <ul class="stack" id="stack">
+      <li><button type="button" data-go="5"><span>The Four Doors</span><small>pages 6 to 9</small></button></li>
+      <li><button type="button" data-go="9"><span>The What-Goes-With-What Map</span><small>page 10</small></button></li>
+      <li><button type="button" data-go="17"><span>The Outfit Builder</span><small>page 18</small></button></li>
+      <li><button type="button" data-go="14"><span>The Build Method</span><small>pages 15 to 17</small></button></li>
+      <li class="bonus"><button type="button" data-go="10"><span>The Eye-Training Set</span><small>bonus</small></button></li>
+      <li class="bonus"><button type="button" data-go="18"><span>The 7-Day Starter Plan</span><small>bonus</small></button></li>
+      <li class="bonus"><button type="button" data-go="19"><span>The Before-You-Buy Test</span><small>bonus</small></button></li>
+      <li class="bonus"><button type="button" data-go="4"><span>The Capsule Maths</span><small>bonus</small></button></li>
+    </ul>
+    <div class="orn" style="right:-4px;bottom:48px;width:40px;height:64px;opacity:.9" data-depth=".8" aria-hidden="true"><svg viewBox="0 0 40 64"><defs><linearGradient id="pf" x1="0" x2="1"><stop offset="0" stop-color="#FBEDF0"/><stop offset="1" stop-color="#E9A3B8"/></linearGradient></defs><rect x="14" y="2" width="12" height="10" rx="2" fill="#C9789A"/><rect x="11" y="12" width="18" height="6" rx="1" fill="#E9A3B8"/><path d="M6 24 C6 18 34 18 34 24 L34 56 C34 60 30 62 26 62 L14 62 C10 62 6 60 6 56 Z" fill="url(#pf)"/><rect x="10" y="34" width="20" height="18" rx="2" fill="#D6336C" opacity=".85"/></svg></div>
+  </div>
+  <footer class="folio"><span>04 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="2" style="--z:20"><div class="face front"><article class="page" aria-label="A little something for you">
+  <header class="page-head"><span class="kicker">Start here</span><span class="kicker">From Earon</span></header>
+  <div class="page-body">
+    <h2 class="h">A little something for you.</h2>
+    <p>I went looking beyond the brands I normally shop. New places to explore. Ideas to test. A clearer way to think about style.</p>
+    <p>The point is not to copy my wardrobe. Notice what catches your eye. Learn why it works for you. Then build a style that feels like yours.</p>
+  </div>
+  <footer class="folio"><span>03 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="1" style="--z:21"><div class="face front night"><article class="page night" id="pg-birthday" aria-label="Happy birthday">
+  <div class="sky" id="sky"><canvas id="fireflies" aria-label="Sanai, written in light"></canvas>
+    <div class="orn" style="right:18px;top:16px;width:46px;height:70px" data-depth="1.2" aria-hidden="true"><svg viewBox="0 0 46 70"><defs><radialGradient id="hb" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FFD6E7"/><stop offset=".5" stop-color="#E9A3B8"/><stop offset="1" stop-color="#C9789A"/></radialGradient></defs><path d="M23 44 C8 32 2 22 6 13 C9 6 19 5 23 13 C27 5 37 6 40 13 C44 22 38 32 23 44 Z" fill="url(#hb)"/><path d="M23 44 C22 52 26 58 22 68" stroke="#F6DDE3" stroke-width="1" fill="none" opacity=".7"/></svg></div>
+  </div>
+  <div class="wish">
+    <span class="kicker fade" id="wish-kicker"><span class="acc">Happy birthday</span></span>
+    <div class="age fade" id="wish-age"><span id="age-num" data-count="18">18</span></div>
+    <blockquote class="quote fade" id="wish-quote"><p>"In order to be irreplaceable one must always be different."</p><cite>Coco Chanel</cite></blockquote>
+    <p class="fade" id="wish-msg" data-gift="MESSAGE">Made for you. Turn the page.</p>
+    <p class="from fade" id="wish-from">from <span data-gift="FROM">Earon</span></p>
+    <button class="btn fade" id="replay" data-noflip type="button" style="margin-top:8px">Light it again</button>
+  </div>
+  <footer class="folio"><span>02 / 22</span><span>From Earon · Vol. 01</span></footer>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+<section class="leaf" data-i="0" style="--z:22"><div class="face front"><article class="page" id="pg-cover" aria-label="Cover">
+  <div class="cover">
+    <span class="kicker">Made for you</span>
+    <h1 class="masthead cover-title">Beyond<br>the Basics</h1>
+    <p class="cover-line"><span class="dash"></span><span>let me put you on.</span></p>
+    <div class="cover-strip" aria-hidden="true">
+      <img src="assets/photos/hillda.webp" width="704" height="1000" alt="" loading="eager" decoding="async">
+      <img src="assets/photos/nia.webp" width="769" height="1000" alt="" loading="eager" decoding="async">
+      <img src="assets/photos/blanch.webp" width="1200" height="850" alt="" loading="eager" decoding="async">
+    </div>
+    <p class="cover-for">for <span data-gift="NAME">Sanai</span></p>
+    <p class="cover-by">Earon · Vol. 01</p>
+    <div class="orn bow" style="right:-6px;top:-10px;width:110px;height:92px" data-depth="1.4" aria-hidden="true"><svg viewBox="0 0 110 92"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBEDF0"/><stop offset=".55" stop-color="#E9A3B8"/><stop offset="1" stop-color="#C9789A"/></linearGradient></defs><path d="M55 44 C40 18 12 14 10 34 C8 50 30 58 55 44 Z" fill="url(#bg1)"/><path d="M55 44 C70 18 98 14 100 34 C102 50 80 58 55 44 Z" fill="url(#bg1)"/><path d="M55 44 C48 58 36 76 30 88 L44 84 L52 60 Z" fill="url(#bg1)"/><path d="M55 44 C62 58 74 76 80 88 L66 84 L58 60 Z" fill="url(#bg1)"/><circle cx="55" cy="44" r="8" fill="#C9789A"/><circle cx="53" cy="42" r="3" fill="#FBEDF0" opacity=".8"/></svg></div>
+  </div>
+</article><div class="shade"></div><div class="cast"></div></div><div class="face back"></div></section>
+      <div class="spine" aria-hidden="true"></div>
+    </div>
+    <nav aria-label="Pages">
+      <button class="nav prev" id="nav-prev" type="button" aria-label="Previous page" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="nav next" id="nav-next" type="button" aria-label="Next page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    </nav>
+    <p class="hint" id="hint" aria-hidden="true">Tap to open</p>
+    <div class="curtain" id="curtain" aria-hidden="true"></div>
+  </div>
+</main>
+<footer class="sr">From Earon, Vol. 01. Edition 1 of 1.</footer>
+<script>window.PAIRS = {"source":"Beyond the Basics, pages 7 and 8 (From Earon / Vol. 01). Transcribed from the rendered pages on 2026-10-10. Circle = familiar starting point. Diamond = less expected possibility.","legend":{"familiar":"Familiar starting point","less":"Less expected possibility","none":"Not in the guide"},"wardrobe":{"black":"#111111","white":"#F4F1EA","grey":"#8E8E8E","navy":"#2A3A63","powder blue":"#BFD7E8","royal blue":"#2F5CB8","red":"#B5332E","pink":"#E8A5BE","beige":"#D6C7A1","tan":"#B8926A","brown":"#6E4A2B","olive":"#6E7638","rust":"#A6512D","forest green":"#2F5D47","mustard":"#C9A227","orange":"#DA6E3A","purple":"#6B3AA0","burgundy":"#7A2634"},"rows":[{"page":7,"main":"black","partners":[["red","familiar"],["navy","familiar"],["grey","familiar"],["white","familiar"],["powder blue","familiar"]]},{"page":7,"main":"navy","partners":[["black","familiar"],["tan","familiar"],["grey","familiar"],["white","familiar"],["powder blue","familiar"]]},{"page":7,"main":"grey","partners":[["black","familiar"],["navy","familiar"],["pink","familiar"],["white","familiar"],["red","familiar"]]},{"page":7,"main":"beige","partners":[["black","familiar"],["navy","familiar"],["olive","familiar"],["rust","familiar"],["red","familiar"]]},{"page":7,"main":"white","partners":[["black","familiar"],["navy","familiar"],["grey","familiar"],["olive","familiar"],["tan","familiar"]]},{"page":7,"main":"forest green","partners":[["black","familiar"],["powder blue","less"],["grey","familiar"],["mustard","familiar"],["beige","familiar"]]},{"page":7,"main":"royal blue","partners":[["black","familiar"],["beige","familiar"],["mustard","less"],["white","familiar"],["powder blue","familiar"]]},{"page":8,"main":"powder blue","partners":[["black","familiar"],["navy","familiar"],["grey","familiar"],["mustard","less"],["beige","familiar"]]},{"page":8,"main":"purple","partners":[["black","familiar"],["beige","familiar"],["grey","familiar"],["white","familiar"],["powder blue","less"]]},{"page":8,"main":"burgundy","partners":[["black","familiar"],["navy","familiar"],["grey","familiar"],["white","familiar"],["beige","familiar"]]},{"page":8,"main":"orange","partners":[["black","familiar"],["mustard","less"],["grey","familiar"],["white","familiar"],["beige","familiar"]]},{"page":8,"main":"mustard","partners":[["black","familiar"],["forest green","familiar"],["grey","familiar"],["white","familiar"],["pink","less"]]},{"page":8,"main":"brown","partners":[["black","familiar"],["navy","familiar"],["grey","familiar"],["white","familiar"],["powder blue","less"]]},{"page":8,"main":"pink","partners":[["black","familiar"],["navy","familiar"],["grey","familiar"],["white","familiar"],["powder blue","familiar"]]}],"notes":{"p7_intro":"Test contrast, harmony and accents. These pairings are starting points.","p7_body":"Contrast creates separation and energy. Complementary colours sit across from each other on the colour wheel, so even a small amount can feel vivid. Use either relationship to create intention, then adjust the intensity until it feels like you.","p7_wheel":"Opposites = complements","p8_intro":"Notice how the same neutral can behave differently beside each main colour.","p8_body":"Tonal dressing stays within lighter and darker versions of one colour, while texture keeps it from feeling flat. An accent colour appears in a smaller dose. The 60/30/10 idea can help you test balance, but it is an option, not a rule."}}; window.GIFT = {"NAME":"Sanai","AGE":18,"DATE":"","MESSAGE":"","FROM":"Earon"};</script>
+<script>
+/* book.js: the leaf engine.
+   Takes: #stage > #book > .leaf elements in page order (leaf 0 is the cover).
+   Gives: Book.next(), Book.prev(), Book.go(i), Book.openCover(), Book.index, Book.on('page', fn).
+   A horizontal drag folds the leaf from the first pixel; release commits past 35% or on a flick; a spring settles it. */
+window.Book = (function () {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const stage = document.getElementById('stage');
+  const book = document.getElementById('book');
+  const leaves = Array.from(book.querySelectorAll('.leaf')).sort((a, b) => Number(a.dataset.i) - Number(b.dataset.i)); // DOM holds the last page first; page order comes from data-i
+  const N = leaves.length;
+  const LEAF = { k: 280, c: 26, m: 1.1 };
+  const COVER = { k: 180, c: 22, m: 1.2 };
+  let index = 0;          // index of the visible page (leaves before it are turned)
+  let anim = null;        // running spring {i, p, v, target, raf}
+  let drag = null;        // pointer state
+  const listeners = { page: [] };
+  const W = () => stage.clientWidth || 390;
+
+  function render(i, p) {
+    const leaf = leaves[i]; if (!leaf) return;
+    const q = Math.min(1, Math.max(0, p));
+    if (reduce) { leaf.style.opacity = String(1 - q); leaf.style.transform = ''; }
+    else leaf.style.transform = 'rotateY(' + (-180 * q).toFixed(3) + 'deg)';
+    const s = Math.sin(q * Math.PI);
+    leaf.style.setProperty('--shade', (0.28 * s).toFixed(3));
+    const under = leaves[i + 1]; if (under) under.style.setProperty('--cast', (0.22 * s).toFixed(3));
+  }
+  function settle(i, target) {
+    const leaf = leaves[i];
+    leaf.classList.remove('active');
+    leaf.style.setProperty('--shade', '0');
+    const under = leaves[i + 1]; if (under) under.style.setProperty('--cast', '0');
+    if (target >= 0.5) { leaf.classList.add('turned'); index = i + 1; } else { leaf.classList.remove('turned'); index = i; }
+    render(i, target >= 0.5 ? 1 : 0);
+    emit('page', index);
+  }
+  function emit(name, v) { listeners[name].forEach(f => { try { f(v); } catch (e) { console.error(e); } }); }
+  function cancel() { if (anim) { cancelAnimationFrame(anim.raf); anim = null; } }
+
+  function spring(i, p0, v0, target, params, done) {
+    cancel();
+    const P = params || LEAF;
+    const leaf = leaves[i]; leaf.classList.add('active');
+    if (reduce) { render(i, target); settle(i, target); done && done(); return; }
+    let p = p0, v = v0, last = performance.now();
+    const st = { i, target, raf: 0, get p() { return p; }, get v() { return v; } };
+    function step(now) {
+      let dt = Math.min(0.5, Math.max(0.001, (now - last) / 1000)); last = now; // catch up after a late frame
+      while (dt > 0) { const h = Math.min(0.008, dt); dt -= h; const a = (-P.k * (p - target) - P.c * v) / P.m; v += a * h; p += v * h; }
+      render(i, p);
+      if (Math.abs(p - target) < 0.002 && Math.abs(v) < 0.02) { anim = null; settle(i, target); done && done(); return; }
+      st.raf = requestAnimationFrame(step);
+    }
+    anim = st; st.raf = requestAnimationFrame(step);
+  }
+
+  function next() { if (anim || book.classList.contains('closed')) return; if (index < N - 1) spring(index, 0, 0, 1); }
+  function prev() { if (anim || book.classList.contains('closed')) return; if (index > 0) spring(index - 1, 1, 0, 0); }
+  function go(target) {
+    target = Math.max(1, Math.min(N - 1, target));
+    if (target === index) return;
+    cancel();
+    // jump instantly to the page before the target, then animate the last leaf
+    const last = target > index ? target - 1 : target;
+    for (let i = 0; i < N; i++) {
+      const turned = i < last;
+      leaves[i].classList.toggle('turned', turned);
+      leaves[i].classList.remove('active');
+      leaves[i].style.setProperty('--shade', '0'); leaves[i].style.setProperty('--cast', '0');
+      render(i, turned ? 1 : 0);
+    }
+    index = last; emit('page', index);
+    if (target > index) spring(index, 0, 0, 1); else spring(index - 1, 1, 0, 0);
+  }
+  function jump(target) { // instant, no animation: deep links and proof screenshots
+    target = Math.max(0, Math.min(N - 1, target)); cancel();
+    for (let i = 0; i < N; i++) { const turned = i < target; leaves[i].classList.toggle('turned', turned); leaves[i].classList.remove('active'); leaves[i].style.setProperty('--shade', '0'); leaves[i].style.setProperty('--cast', '0'); render(i, turned ? 1 : 0); }
+    index = target; emit('page', index);
+  }
+  function openCover(done) { spring(0, 0, 0, 1, COVER, done); }
+  function closeBook(done) {
+    cancel();
+    for (let i = 1; i < N; i++) { leaves[i].classList.remove('turned'); render(i, 0); }
+    index = 1; emit('page', index);
+    spring(0, 1, 0, 0, COVER, done);
+  }
+
+  // pointer handling: the browser owns vertical (touch-action: pan-y); we take horizontal
+  function onDown(e) {
+    if (book.classList.contains('closed')) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.target.closest('[data-noflip], .strip, a, .nav')) return;
+    const now = performance.now();
+    drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, t0: now, decided: false, i: -1, startP: 0, dx0: 0, p: null, samples: [[now, e.clientX]] };
+    if (anim) { // grab a leaf mid-flight
+      drag.i = anim.i; drag.startP = anim.p; drag.decided = true;
+      cancel(); leaves[drag.i].classList.add('active');
+      try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+    }
+  }
+  function onMove(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0, now = performance.now();
+    drag.samples.push([now, e.clientX]); if (drag.samples.length > 24) drag.samples.shift();
+    if (!drag.decided) {
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      if (Math.abs(dx) >= 10 && Math.abs(dx) > 1.2 * Math.abs(dy)) {
+        if (dx < 0) { if (index >= N - 1) { drag = null; return; } drag.i = index; drag.startP = 0; }
+        else { if (index <= 1) { drag = null; return; } drag.i = index - 1; drag.startP = 1; }
+        drag.decided = true; drag.dx0 = dx;
+        leaves[drag.i].classList.add('active');
+        try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+      } else { drag = null; return; }
+    }
+    const p = Math.min(1, Math.max(0, drag.startP - (dx - drag.dx0) / W()));
+    drag.p = p; render(drag.i, p);
+    if (e.cancelable) e.preventDefault();
+  }
+  function onUp(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag; drag = null;
+    if (!d.decided || d.i < 0) return;
+    const now = performance.now();
+    const recent = d.samples.filter(s => now - s[0] <= 100);
+    const first = recent[0] || d.samples[0];
+    const v = (e.clientX - first[1]) / Math.max(1, now - first[0]); // px per ms
+    const travel = e.clientX - d.x0, dur = now - d.t0;
+    const flick = Math.abs(travel) >= 24 && Math.abs(v) > 0.35 && dur < 300;
+    const p = d.p == null ? d.startP : d.p;
+    let target;
+    if (d.startP === 0) target = flick ? (v < 0 ? 1 : 0) : (p > 0.35 ? 1 : 0);
+    else target = flick ? (v > 0 ? 0 : 1) : (p < 0.65 ? 0 : 1);
+    spring(d.i, p, -v * 1000 / W(), target);
+  }
+  function onCancel(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag; drag = null;
+    if (d.decided && d.i >= 0) { const p = d.p == null ? d.startP : d.p; spring(d.i, p, 0, p >= 0.5 ? 1 : 0); }
+  }
+  stage.addEventListener('pointerdown', onDown);
+  stage.addEventListener('pointermove', onMove);
+  stage.addEventListener('pointerup', onUp);
+  stage.addEventListener('pointercancel', onCancel);
+  // edge taps
+  stage.addEventListener('click', e => {
+    if (book.classList.contains('closed')) return;
+    if (e.target.closest('button, a, [data-noflip], .strip, input, label')) return;
+    const r = stage.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width;
+    if (x > 0.82) next(); else if (x < 0.18 && index > 1) prev();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') next(); else if (e.key === 'ArrowLeft') prev();
+  });
+  window.addEventListener('resize', () => { for (let i = 0; i < N; i++) render(i, leaves[i].classList.contains('turned') ? 1 : 0); });
+
+  return { next, prev, go, jump, openCover, closeBook, get index() { return index; }, get count() { return N; }, get animating() { return !!anim; },
+    on(name, f) { listeners[name].push(f); }, leaves };
+})();
+
+/* fireworks.js: one burst sequence on a canvas over the stage. Takes a container; gives a promise that resolves when the canvas is gone (2000 ms). Numbers: motion-notes.md section 3. */
+window.Fireworks = (function () {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const COLORS = [['#E9A3B8', 40], ['#F6DDE3', 25], ['#D6336C', 20], ['#FFFFFF', 10], ['#C9A86A', 5]];
+  function pick() { let r = Math.random() * 100; for (const [c, w] of COLORS) { if ((r -= w) <= 0) return c; } return '#E9A3B8'; }
+  function play(container, opts) {
+    opts = opts || {};
+    const life = opts.life || 2000;
+    return new Promise(resolve => {
+      if (reduce) { sparkles(container); setTimeout(resolve, 300); return; }
+      const c = document.createElement('canvas');
+      c.className = 'fx'; c.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:60';
+      container.appendChild(c);
+      const dpr = Math.min(2, devicePixelRatio || 1);
+      const w = container.clientWidth, h = container.clientHeight;
+      c.width = w * dpr; c.height = h * dpr;
+      const ctx = c.getContext('2d'); ctx.scale(dpr, dpr);
+      const parts = [];
+      const bursts = opts.bursts || [[0, w * 0.2, h * 0.22], [260, w * 0.8, h * 0.26], [520, w * 0.5, h * 0.14]];
+      const count = opts.count || 90;
+      function burst(x, y) {
+        for (let i = 0; i < count; i++) {
+          const a = Math.random() * Math.PI * 2, s = 180 + Math.random() * 240;
+          parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 40, life: 1.1 + Math.random() * 0.5, age: 0, c: pick(), trail: [] });
+        }
+      }
+      const t0 = performance.now(); let last = t0; let fired = 0;
+      function frame(now) {
+        const dt = Math.min(0.1, (now - last) / 1000); last = now; const t = now - t0;
+        while (fired < bursts.length && t >= bursts[fired][0]) { burst(bursts[fired][1], bursts[fired][2]); fired++; }
+        ctx.clearRect(0, 0, w, h);
+        ctx.globalCompositeOperation = 'lighter';
+        for (const p of parts) {
+          if (p.age >= p.life) continue;
+          p.age += dt; p.vy += 320 * dt; p.vx *= 0.985; p.vy *= 0.985;
+          p.trail.push([p.x, p.y]); if (p.trail.length > 4) p.trail.shift();
+          p.x += p.vx * dt; p.y += p.vy * dt;
+          const a = Math.max(0, 1 - p.age / p.life);
+          ctx.strokeStyle = p.c; ctx.lineCap = 'round';
+          for (let k = 0; k < p.trail.length; k++) {
+            const q = (k + 1) / p.trail.length;
+            ctx.globalAlpha = a * q * 0.9; ctx.lineWidth = 1 + 1.6 * q;
+            ctx.beginPath(); ctx.moveTo(p.trail[k][0], p.trail[k][1]); ctx.lineTo(k + 1 < p.trail.length ? p.trail[k + 1][0] : p.x, k + 1 < p.trail.length ? p.trail[k + 1][1] : p.y); ctx.stroke();
+          }
+          ctx.globalAlpha = a; ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        if (t < life) requestAnimationFrame(frame); else { c.remove(); resolve(); }
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+  function sparkles(container) {
+    const box = document.createElement('div');
+    box.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:60;opacity:0;transition:opacity 200ms';
+    for (let i = 0; i < 8; i++) {
+      const s = document.createElement('span');
+      s.style.cssText = 'position:absolute;width:14px;height:14px;left:' + (10 + Math.random() * 80) + '%;top:' + (8 + Math.random() * 40) + '%;background:#E9A3B8;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%)';
+      box.appendChild(s);
+    }
+    container.appendChild(box); requestAnimationFrame(() => { box.style.opacity = '1'; });
+    setTimeout(() => { box.style.opacity = '0'; setTimeout(() => box.remove(), 300); }, 1800);
+  }
+  return { play };
+})();
+
+/* fireflies.js: glowing sparks swarm, then settle into a word (Glaido's welcome screen, in pink).
+   Takes a canvas and a word; gives {form(), scatter(), pause(), resume()}. Numbers: motion-notes.md section 1. */
+window.Fireflies = (function () {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const COLORS = ['#E9A3B8', '#E9A3B8', '#D6336C', '#FFD6E7', '#FFFFFF'];
+  const K = 120, C = 18, M = 1;
+  function mount(canvas, word, opts) {
+    opts = opts || {};
+    const ctx = canvas.getContext('2d');
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    let w = 0, h = 0, parts = [], targets = [], mode = 'idle', raf = 0, t0 = 0, last = 0, paused = false, formedAt = 0;
+    let cx = 0, cy = 0;
+    function size() {
+      const r = canvas.getBoundingClientRect();
+      w = Math.max(1, Math.round(r.width)); h = Math.max(1, Math.round(r.height));
+      canvas.width = w * dpr; canvas.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cx = w / 2; cy = h * 0.5;
+    }
+    function sample() {
+      // draw the word on an offscreen canvas and read back its pixels every 4px
+      const off = document.createElement('canvas'); const o = off.getContext('2d');
+      const fontSize = Math.min(150, Math.floor(w * 0.34));
+      o.font = 'italic 400 ' + fontSize + 'px "Bodoni Moda", Georgia, serif';
+      const tw = o.measureText(word).width;
+      off.width = Math.ceil(tw + 20); off.height = Math.ceil(fontSize * 1.3);
+      o.font = 'italic 400 ' + fontSize + 'px "Bodoni Moda", Georgia, serif'; o.fillStyle = '#fff'; o.textBaseline = 'alphabetic';
+      // Bodoni's hairlines are about 1px at this size and fall between sample points; a stroke thickens every part of the glyph
+      o.lineWidth = Math.max(3, fontSize * 0.035); o.strokeStyle = '#fff'; o.lineJoin = 'round';
+      o.strokeText(word, 10, fontSize); o.fillText(word, 10, fontSize);
+      const letters = []; let x = 10; // letter x boundaries for the stagger
+      for (const ch of word) { const lw = o.measureText(ch).width; letters.push([x, x + lw]); x += lw; }
+      const d = o.getImageData(0, 0, off.width, off.height).data;
+      const pts = []; const step = 3;
+      for (let yy = 0; yy < off.height; yy += step) for (let xx = 0; xx < off.width; xx += step) {
+        if (d[(yy * off.width + xx) * 4 + 3] > 60) {
+          let li = 0; for (let k = 0; k < letters.length; k++) if (xx >= letters[k][0]) li = k;
+          pts.push({ x: xx, y: yy, li });
+        }
+      }
+      // scale and centre on the canvas
+      const sx = (w - 40) / off.width; const sc = Math.min(1, sx);
+      const ox = (w - off.width * sc) / 2, oy = (h - off.height * sc) / 2;
+      targets = pts.map(p => ({ x: ox + p.x * sc, y: oy + p.y * sc, li: p.li }));
+      if (targets.length > 640) { const keep = []; const r = targets.length / 640; for (let i = 0; i < 640; i++) keep.push(targets[Math.floor(i * r)]); targets = keep; }
+    }
+    function seed() {
+      parts = targets.map((t, i) => {
+        const a = Math.random() * Math.PI * 2, r = Math.min(w, h) * (0.18 + Math.random() * 0.26);
+        return { x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r, vx: 0, vy: 0, a, r, spin: (Math.random() < 0.5 ? -1 : 1) * (0.35 + Math.random() * 0.5), ph: Math.random() * Math.PI * 2,
+          tx: t.x, ty: t.y, delay: t.li * 0.09 + Math.random() * 0.12, c: COLORS[i % COLORS.length], blink: 5 + Math.random() * 4, bo: Math.random() * 9, len: 6 + Math.random() * 4 };
+      });
+    }
+    function draw(now) {
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+      const T = (now - t0) / 1000;
+      for (const p of parts) {
+        const blink = 0.55 + 0.45 * Math.max(0, Math.sin((T + p.bo) / p.blink * Math.PI * 2));
+        let len = p.len;
+        if (mode === 'formed') { len = 3; }
+        const sp = Math.hypot(p.vx, p.vy) || 1; const ux = p.vx / sp, uy = p.vy / sp;
+        const x2 = p.x - ux * len, y2 = p.y - uy * len;
+        ctx.strokeStyle = p.c;
+        ctx.globalAlpha = 0.16 * blink; ctx.lineWidth = 7;
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.globalAlpha = 0.95 * blink; ctx.lineWidth = 1.7;
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(x2, y2); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+    function step(now) {
+      if (paused) return;
+      let left = Math.min(0.6, Math.max(0.001, (now - last) / 1000)); last = now; // catch up after a late frame
+      const T = (now - t0) / 1000;
+      while (left > 0) { const dt = Math.min(0.033, left); left -= dt;
+      for (const p of parts) {
+        if (mode === 'swarm' || (mode === 'form' && T < p.delay + 1.2)) {
+          // drift on a slow curve around the centre, the cloud breathing over ~6 s
+          p.a += p.spin * dt;
+          const breathe = 1 + 0.12 * Math.sin(T / 6 * Math.PI * 2 + p.ph);
+          const gx = cx + Math.cos(p.a) * p.r * breathe, gy = cy + Math.sin(p.a) * p.r * breathe * 0.7;
+          p.vx += (gx - p.x) * 2.2 * dt; p.vy += (gy - p.y) * 2.2 * dt;
+          p.vx *= 0.96; p.vy *= 0.96;
+          p.x += p.vx * dt * 6; p.y += p.vy * dt * 6;
+        } else if (mode === 'form' || mode === 'formed') {
+          const wob = mode === 'formed' ? 1.5 : 0;
+          const tx = p.tx + wob * Math.sin(T * 1.3 + p.ph), ty = p.ty + wob * Math.cos(T * 1.1 + p.ph);
+          const ax = (K * (tx - p.x) - C * p.vx) / M, ay = (K * (ty - p.y) - C * p.vy) / M;
+          p.vx += ax * dt; p.vy += ay * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+        }
+      } }
+      if (mode === 'form' && T > 2.8) { mode = 'formed'; formedAt = now; }
+      draw(now);
+      raf = requestAnimationFrame(step);
+    }
+    function start() {
+      cancelAnimationFrame(raf);
+      size();
+      if (reduce) { staticWord(); return; }
+      // the word is sampled from the real face; wait for it (at most 1.5 s), or the sparks would spell a fallback font
+      const fontSize = Math.min(150, Math.floor(w * 0.34));
+      const ready = document.fonts && document.fonts.load ? document.fonts.load('italic 400 ' + fontSize + 'px "Bodoni Moda"') : Promise.resolve();
+      Promise.race([ready, new Promise(r => setTimeout(r, 1500))]).then(begin, begin);
+    }
+    function begin() {
+      sample(); seed();
+      mode = 'form'; t0 = performance.now() - 0; last = t0;
+      // 1.2 s of swarm comes from the per-particle delay plus 1.2 s window above
+      raf = requestAnimationFrame(step);
+    }
+    function staticWord() {
+      ctx.clearRect(0, 0, w, h);
+      const fontSize = Math.min(150, Math.floor(w * 0.34));
+      ctx.font = 'italic 400 ' + fontSize + 'px "Bodoni Moda", Georgia, serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.shadowColor = '#E9A3B8'; ctx.shadowBlur = 18; ctx.fillStyle = '#FFD6E7';
+      ctx.fillText(word, w / 2, h / 2); ctx.shadowBlur = 0;
+    }
+    function scatter() {
+      if (reduce) return;
+      for (const p of parts) { const a = Math.random() * Math.PI * 2, s = 120 + Math.random() * 220; p.vx = Math.cos(a) * s; p.vy = Math.sin(a) * s; p.a = Math.random() * Math.PI * 2; }
+      mode = 'swarm'; t0 = performance.now(); last = t0;
+      setTimeout(() => { if (mode === 'swarm') { mode = 'form'; t0 = performance.now() - 1200; } }, 900);
+      if (!raf) raf = requestAnimationFrame(step);
+    }
+    function pause() { paused = true; cancelAnimationFrame(raf); raf = 0; }
+    function resume() { if (!paused) return; paused = false; last = performance.now(); if (!reduce) raf = requestAnimationFrame(step); }
+    document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); else if (mode !== 'idle') resume(); });
+    return { start, scatter, pause, resume, get mode() { return mode; }, get count() { return parts.length; }, get targets() { return targets.length; }, get t() { return (performance.now() - t0) / 1000; }, settle() { for (let i = 0; i < 160; i++) { for (const p of parts) { const ax = (K * (p.tx - p.x) - C * p.vx) / M, ay = (K * (p.ty - p.y) - C * p.vy) / M; p.vx += ax * 0.033; p.vy += ay * 0.033; p.x += p.vx * 0.033; p.y += p.vy * 0.033; } } mode = 'formed'; draw(performance.now()); }, sample() { const p = parts[0]; return p ? { x: Math.round(p.x), y: Math.round(p.y), tx: Math.round(p.tx), ty: Math.round(p.ty), delay: p.delay } : null; } };
+  }
+  return { mount };
+})();
+
+/* ornaments.js: rose objects around the book. Parallax from the book tilt or the flip, plus a slow idle drift.
+   Takes nothing (reads .orn[data-depth]); gives Ornaments.tilt(rx, ry) and Ornaments.setActive(pageEl). Numbers: motion-notes.md section 7. */
+window.Ornaments = (function () {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const all = Array.from(document.querySelectorAll('.orn')).map((el, i) => ({ el, d: parseFloat(el.dataset.depth || '1'), ph: Math.random() * 6.28, per: 7 + (i % 5), amp: 4 + (i % 3) * 2, rot: parseFloat((el.style.getPropertyValue('--rot') || '0').replace('deg', '')) || 0 }));
+  let rx = 0, ry = 0, raf = 0, active = [];
+  function apply(now) {
+    const t = now / 1000;
+    for (const o of active) {
+      const dx = reduce ? 0 : Math.sin(t / o.per * 6.283 + o.ph) * o.amp, dy = reduce ? 0 : Math.cos(t / (o.per * 1.3) * 6.283 + o.ph) * o.amp * 0.6;
+      o.el.style.transform = 'translate3d(' + (ry * 18 * o.d + dx).toFixed(2) + 'px,' + (rx * 12 * o.d + dy).toFixed(2) + 'px,0) rotate(' + (ry * 3 * o.d + o.rot).toFixed(2) + 'deg)';
+    }
+  }
+  function loop(now) { apply(now); raf = active.length && !document.hidden && !reduce ? requestAnimationFrame(loop) : 0; }
+  function tilt(x, y) { rx = x; ry = y; if (!raf) apply(performance.now()); }
+  function setActive(root) {
+    active = root ? all.filter(o => root.contains(o.el)) : [];
+    cancelAnimationFrame(raf); raf = 0;
+    if (active.length) { if (reduce) apply(performance.now()); else raf = requestAnimationFrame(loop); }
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && active.length && !raf && !reduce) raf = requestAnimationFrame(loop); });
+  return { tilt, setActive };
+})();
+
+/* widgets.js: the small interactive pieces. Each init takes the page's DOM and reads window.PAIRS / window.GIFT.
+   Gives: countUp, and one init per widget, all run from app.js. Every number shown is computed here, never typed into copy. */
+window.Widgets = (function () {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const PAIRS = window.PAIRS || { rows: [], wardrobe: {}, legend: {} };
+  const WARD = PAIRS.wardrobe;
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  function countUp(el, to, ms) {
+    if (!el) return; ms = ms || 900;
+    if (reduce) { el.textContent = String(to); return; }
+    const from = parseFloat(el.dataset.from || '0') || 0, start = performance.now();
+    const ease = t => 1 - Math.pow(1 - t, 3);
+    (function tick(now) { const t = Math.min(1, (now - start) / ms); el.textContent = String(Math.round(from + (to - from) * ease(t))); if (t < 1) requestAnimationFrame(tick); })(start);
+  }
+  function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); localStorage.setItem(k, JSON.stringify(v)); } catch (_) { return null; } }
+  function lookup(a, b) {
+    if (!a || !b) return null; if (a === b) return 'same';
+    for (const r of PAIRS.rows) {
+      if (r.main === a) { const p = r.partners.find(x => x[0] === b); if (p) return p[1]; }
+      if (r.main === b) { const p = r.partners.find(x => x[0] === a); if (p) return p[1]; }
+    }
+    return 'none';
+  }
+  function swatch(name, extra) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'sw' + (extra ? ' ' + extra : '');
+    b.dataset.c = name; b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', cap(name));
+    b.innerHTML = '<i style="--c:' + WARD[name] + '"></i><span>' + cap(name) + '</span>';
+    return b;
+  }
+  // gift slots
+  function initGift() {
+    const G = window.GIFT || {};
+    document.querySelectorAll('[data-gift]').forEach(el => {
+      const k = el.dataset.gift, v = G[k];
+      if (k === 'DATE') { if (v) { el.textContent = 'Made on ' + v + '.'; el.hidden = false; } return; }
+      if (v) el.textContent = v;
+    });
+  }
+  // promise stack
+  function initStack() { document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => window.Book.go(parseInt(b.dataset.go, 10)))); }
+  // capsule maths
+  function initMaths() {
+    const box = document.getElementById('steppers'); if (!box) return;
+    const outs = Array.from(box.querySelectorAll('output'));
+    const total = document.getElementById('outfit-total'), line = document.getElementById('maths-line');
+    function calc(animate) {
+      const vals = outs.map(o => parseInt(o.value || o.textContent, 10));
+      const t = vals.reduce((a, b) => a * b, 1);
+      line.textContent = vals.join(' × ') + ' = ' + t;
+      if (animate) { total.dataset.from = total.textContent; countUp(total, t, 500); } else total.textContent = String(t);
+      total.dataset.count = String(t);
+    }
+    box.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const o = b.parentElement.querySelector('output'); let v = parseInt(o.textContent, 10) + parseInt(b.dataset.step, 10);
+      v = Math.max(1, Math.min(12, v)); o.textContent = String(v); calc(true);
+    }));
+    calc(false);
+  }
+  // the map
+  function initMap() {
+    const mains = document.getElementById('map-mains'), panel = document.getElementById('map-partners'); if (!mains) return;
+    PAIRS.rows.forEach(r => mains.appendChild(swatch(r.main)));
+    mains.addEventListener('click', e => {
+      const b = e.target.closest('.sw'); if (!b) return;
+      mains.querySelectorAll('.sw').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      const row = PAIRS.rows.find(r => r.main === b.dataset.c);
+      panel.hidden = false;
+      panel.innerHTML = '<p class="who">' + cap(row.main) + ' with</p><div class="swatches"></div><p class="small" style="margin:10px 0 0"></p>';
+      const grid = panel.querySelector('.swatches');
+      row.partners.forEach(([c, tag]) => grid.appendChild(swatch(c, tag === 'less' ? 'less' : 'familiar')));
+      const less = row.partners.filter(p => p[1] === 'less').map(p => cap(p[0]));
+      panel.querySelector('p.small').textContent = less.length ? less.join(', ') + ': a less expected possibility. The rest are familiar starting points.' : 'All five are familiar starting points.';
+    });
+  }
+  // tappable questions and the lab grid
+  function initToggles() {
+    document.querySelectorAll('.check[role="checkbox"]:not([data-day])').forEach(b => b.addEventListener('click', () => b.setAttribute('aria-checked', b.getAttribute('aria-checked') === 'true' ? 'false' : 'true')));
+    document.querySelectorAll('#lab button').forEach(b => b.addEventListener('click', () => b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true')));
+  }
+  // outfit builder
+  function initBuilder() {
+    const strips = document.getElementById('strips'); if (!strips) return;
+    const pick = { bottom: null, top: null, layer: null, shoes: null };
+    const fills = { bottom: 'f-bottom', top: 'f-top', layer: 'f-layer', shoes: 'f-shoes' };
+    const names = Object.keys(WARD);
+    strips.querySelectorAll('.strip').forEach(strip => {
+      names.forEach(n => strip.appendChild(swatch(n)));
+      strip.addEventListener('click', e => {
+        const b = e.target.closest('.sw'); if (!b) return;
+        const slot = strip.dataset.slot; pick[slot] = b.dataset.c;
+        strip.querySelectorAll('.sw').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+        strips.querySelector('output[data-for="' + slot + '"]').textContent = cap(b.dataset.c);
+        document.getElementById(fills[slot]).setAttribute('fill', WARD[b.dataset.c]);
+        verdicts();
+      });
+    });
+    const out = document.getElementById('verdicts');
+    const L = PAIRS.legend;
+    function verdicts() {
+      const pairs = [['bottom', 'top'], ['bottom', 'layer'], ['bottom', 'shoes'], ['top', 'layer']];
+      const items = [];
+      for (const [a, b] of pairs) {
+        if (!pick[a] || !pick[b]) continue;
+        const v = lookup(pick[a], pick[b]);
+        const word = v === 'same' ? 'the same colour, tonal' : (L[v] || L.none);
+        items.push('<li><b>' + cap(pick[a]) + ' ' + a + ' + ' + pick[b] + ' ' + b + '</b><span class="tag ' + (v === 'same' ? 'familiar' : v) + '">' + word + '</span></li>');
+      }
+      out.innerHTML = items.length ? items.join('') : '<li class="lede">Pick two colours to see what the guide says.</li>';
+    }
+  }
+  // the week
+  function initWeek() {
+    const list = document.getElementById('week'); if (!list) return;
+    const n = document.getElementById('week-n');
+    const saved = store('btb-week') || {}; let celebrated = false;
+    const rows = Array.from(list.querySelectorAll('.check'));
+    rows.forEach(b => { if (saved[b.dataset.day]) b.setAttribute('aria-checked', 'true'); });
+    function count(animate) {
+      const done = rows.filter(b => b.getAttribute('aria-checked') === 'true').length;
+      if (animate) { n.dataset.from = n.textContent; countUp(n, done, 400); } else n.textContent = String(done);
+      if (done === rows.length && !celebrated && animate) { celebrated = true; const s = document.getElementById('stage'); window.Fireworks.play(s, { bursts: [[0, s.clientWidth * 0.5, s.clientHeight * 0.3]], count: 70, life: 1500 }); }
+      if (done < rows.length) celebrated = false;
+    }
+    rows.forEach(b => b.addEventListener('click', () => {
+      const on = b.getAttribute('aria-checked') !== 'true'; b.setAttribute('aria-checked', on ? 'true' : 'false');
+      saved[b.dataset.day] = on; store('btb-week', saved); count(true);
+    }));
+    count(false);
+  }
+  // before you buy
+  function initBuy() {
+    const box = document.getElementById('buy'); if (!box) return;
+    const v = document.getElementById('buy-verdict'); const ans = {};
+    box.querySelectorAll('.yn button').forEach(b => b.addEventListener('click', () => {
+      ans[b.dataset.q] = b.dataset.v;
+      box.querySelectorAll('.yn button[data-q="' + b.dataset.q + '"]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      const yes = Object.values(ans).filter(x => x === 'yes').length, total = Object.keys(ans).length;
+      v.textContent = total < 2 ? 'Answer both.' : yes === 2 ? 'Two yeses. Buy it.' : yes === 1 ? 'One yes. Leave it for now.' : 'Two noes. Leave it.';
+    }));
+  }
+  function initAll() { initGift(); initStack(); initMaths(); initMap(); initToggles(); initBuilder(); initWeek(); initBuy(); }
+  return { countUp, initAll, lookup };
+})();
+
+/* app.js: boots the book. The closed cover tilts and opens; fireworks, then the fireflies spell the name; pages wire their widgets.
+   Timings: motion-notes.md sections 2 to 4. */
+(function () {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const room = document.getElementById('room'), stage = document.getElementById('stage'), book = document.getElementById('book');
+  const hint = document.getElementById('hint'), curtain = document.getElementById('curtain');
+  const G = window.GIFT || {};
+  const ff = window.Fireflies.mount(document.getElementById('fireflies'), String(G.NAME || 'Sanai').toUpperCase());
+  window.__ff = ff; // read-only handle for the browser proof
+  const pageOf = i => window.Book.leaves[i] && window.Book.leaves[i].querySelector('.page');
+  window.__frames = []; window.__metrics = {};
+  try { new PerformanceObserver(l => { for (const e of l.getEntries()) window.__metrics.lcp = Math.round(e.startTime); }).observe({ type: 'largest-contentful-paint', buffered: true }); } catch (_) {}
+  (function logFrames(now) { if (window.Book.animating && window.__frames.length < 2000) window.__frames.push(now); requestAnimationFrame(logFrames); })(performance.now());
+
+  window.Widgets.initAll();
+  const fontsReady = Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Promise(r => setTimeout(r, 1200))]);
+  fontsReady.then(() => {
+    curtain.classList.add('off');
+    window.Ornaments.setActive(pageOf(0));
+    setTimeout(() => hint.classList.add('on'), 1200);
+  });
+
+  // closed book: drag tilts it, a tap opens it
+  let td = null, opened = false;
+  stage.addEventListener('pointerdown', e => {
+    if (!book.classList.contains('closed') || opened) return;
+    td = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), moved: false };
+    book.classList.add('tilting');
+  });
+  stage.addEventListener('pointermove', e => {
+    if (!td || e.pointerId !== td.id) return;
+    const dx = e.clientX - td.x, dy = e.clientY - td.y;
+    if (Math.hypot(dx, dy) > 8) td.moved = true;
+    const ry = Math.max(-10, Math.min(10, -6 + dx / 12)), rx = Math.max(-6, Math.min(6, 4 - dy / 16));
+    book.style.setProperty('--ry', ry + 'deg'); book.style.setProperty('--rx', rx + 'deg');
+    window.Ornaments.tilt(rx / 6, ry / 10);
+  });
+  function tiltEnd(e, cancelled) {
+    if (!td || e.pointerId !== td.id) return;
+    const d = td; td = null;
+    book.classList.remove('tilting');
+    book.style.setProperty('--ry', '-6deg'); book.style.setProperty('--rx', '4deg');
+    window.Ornaments.tilt(0, 0);
+    if (!cancelled && !d.moved && performance.now() - d.t < 400) open();
+  }
+  stage.addEventListener('pointerup', e => tiltEnd(e, false));
+  stage.addEventListener('pointercancel', e => tiltEnd(e, true));
+  document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && book.classList.contains('closed')) { e.preventDefault(); open(); } });
+
+  const show = id => { const el = document.getElementById(id); if (el) el.classList.add('on'); };
+  function open() {
+    if (opened) return; opened = true;
+    book.classList.add('press'); hint.classList.remove('on');
+    setTimeout(() => { book.classList.remove('press'); window.Fireworks.play(stage); }, 120);
+    setTimeout(() => { book.classList.remove('closed'); room.classList.add('open', 'lit'); window.Book.openCover(); }, 300);
+    setTimeout(() => { ff.start(); }, reduce ? 600 : 2000);
+    setTimeout(() => show('wish-kicker'), reduce ? 800 : 3800);
+    setTimeout(() => { show('wish-age'); window.Widgets.countUp(document.getElementById('age-num'), Number(G.AGE || 18), 800); }, reduce ? 900 : 4200);
+    setTimeout(() => show('wish-quote'), reduce ? 950 : 4500);
+    setTimeout(() => { show('wish-msg'); show('wish-from'); show('replay'); }, reduce ? 1000 : 5000);
+  }
+  document.getElementById('replay').addEventListener('click', () => ff.scatter());
+  document.getElementById('close-book').addEventListener('click', () => {
+    window.Book.closeBook(() => { book.classList.add('closed'); room.classList.remove('open', 'lit'); opened = false; ff.pause(); setTimeout(() => hint.classList.add('on'), 1000); });
+  });
+  // deep link: #p9 opens the book straight to page 10 (no fireworks). A plain token, so it also works in the artifact.
+  const m = /^#p(\d+)$/.exec(location.hash || '');
+  if (m) { const n = Math.max(0, Math.min(window.Book.count - 1, parseInt(m[1], 10)));
+    if (n > 0) { opened = true; book.classList.remove('closed'); room.classList.add('open', 'lit'); hint.classList.remove('on');
+      window.Book.jump(n); ['wish-kicker', 'wish-age', 'wish-quote', 'wish-msg', 'wish-from', 'replay'].forEach(show);
+      if (n === 1) fontsReady.then(() => { ff.start(); if (ff.settle) setTimeout(() => ff.settle(), 50); }); } }
+  const prev = document.getElementById('nav-prev'), next = document.getElementById('nav-next');
+  prev.addEventListener('click', () => window.Book.prev()); next.addEventListener('click', () => window.Book.next());
+  window.Book.on('page', i => {
+    prev.disabled = i <= 1; next.disabled = i >= window.Book.count - 1;
+    const p = pageOf(i); if (p) { p.classList.add('entered'); window.Ornaments.setActive(p); }
+    if (i === 1) ff.resume(); else ff.pause();
+  });
+})();
+
+</script>
+
+</body>
+</html>
